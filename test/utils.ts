@@ -1,6 +1,10 @@
 import express, { Express } from "express";
 import { productsEndpoints } from "../endpoints/scraper/products-endpoints";
 import { shoppingListEndpoints } from "../endpoints/scraper/shopping-list-endpoints";
+<<<<<<< HEAD
+import { HISTORY_PRICES, PRICES, PRODUCTS, SHOPPING_LIST, SHOPPING_LIST_PRODUCTS, USER_SHOPPING_LIST } from "../scripts/dummies";
+import init from "../scripts/init-seed";
+=======
 import {
   HISTORY_PRICES,
   PRICES,
@@ -16,6 +20,7 @@ import {
 import init, { createTableBaseTest } from "../scripts/init-seed";
 import { storesEndpoints } from "../endpoints/scraper/stores-endpoints";
 import { userEndpoints } from "../endpoints/scraper/user-endpoints";
+>>>>>>> main
 
 async function buildTestDB() {
   await init(PRODUCTS,

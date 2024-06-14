@@ -4,9 +4,13 @@ import { getConnection } from "./connection";
 import Logger from "@coding-flavour/logger";
 
 type Fields = {
-  [key: string]: any;
+  [ key: string ]: any;
 }
 
+export enum baseSortOptions {
+  ASC = 'ASC',
+  DESC = 'DESC'
+}
 class BaseQuery<T extends Fields> {
   protected table: string = "";
   protected fields: T = {} as T;
@@ -38,7 +42,7 @@ class BaseQuery<T extends Fields> {
     const tableName = this.table;
 
     const newPair = this.buildNewPair(values);
-    const whereTemplate = Object.keys(newPair).map(field => `${field} = ${newPair[field]}`).join(" AND ");
+    const whereTemplate = Object.keys(newPair).map(field => `${field} = ${newPair[ field ]}`).join(" AND ");
     const deleteQuery = `DELETE FROM ${tableName} WHERE ${whereTemplate}`;
     this.logger.debug('Generated query', { generatedQuery: deleteQuery })
 
@@ -50,9 +54,9 @@ class BaseQuery<T extends Fields> {
   }
 
   async getByPk(pkValue: number | string) {
-    const [primaryValue] = await this.query<T[]>(`SELECT * FROM ${this.table} WHERE ${this.primaryKey} = ${pkValue}`);
+    const [ primaryValue ] = await this.query<T[]>(`SELECT * FROM ${this.table} WHERE ${this.primaryKey} = ${pkValue}`);
 
-    return primaryValue[0];
+    return primaryValue[ 0 ];
   }
 
   private cleanValue(value: unknown) {
@@ -60,24 +64,34 @@ class BaseQuery<T extends Fields> {
   }
 
   async getAllByField(field: keyof T, value: string | number, orderBy?: unknown) {
-    const [rows] = await this.query<T[]>(`SELECT * FROM ${this.table} WHERE ${String(field)} = ${this.cleanValue(value)} ${this.getOrderBy(orderBy)}`);
+    const [ rows ] = await this.query<T[]>(`SELECT * FROM ${this.table} WHERE ${String(field)} = ${this.cleanValue(value)} ${this.getOrderBy(orderBy)}`);
 
     return rows;
   }
 
-  getOrderBy(_sortBy: unknown) {
-    return ''
+  getOrderBy(sortBy: unknown, sortField?: unknown) {
+    switch (sortBy) {
+      case baseSortOptions.ASC:
+        return `ORDER BY ${sortField} ASC`
+      case baseSortOptions.DESC:
+        return `ORDER BY ${sortField} DESC`
+      default:
+        return ''
+    }
   }
 
-  async getAll() {
-    const [data] = await this.query<T[]>(`SELECT * FROM ${this.table}`);
+  getLimit(limit: unknown) {
+    return limit ? `LIMIT ${limit}` : ''
+  }
 
-    return data;
+  async getAll(sortField?: keyof T, orderBy?: string, limit?: number) {
+    const [ rows ] = await this.query<T[]>(`SELECT * FROM ${this.table} ${this.getOrderBy(orderBy, sortField)} ${this.getLimit(limit)}`);
+    return rows;
   }
 
   private buildNewPair(values: T): Fields {
     return Object.keys(this.getFields()).reduce((acc, field) => {
-      const value = this.cleanValue(values[field]);
+      const value = this.cleanValue(values[ field ]);
 
       if (!value) {
         throw new Error(`Field ${field} is required in ${this.table} table`);
@@ -85,7 +99,7 @@ class BaseQuery<T extends Fields> {
 
       return {
         ...acc,
-        [field]: value,
+        [ field ]: value,
       }
     }, {});
   }
