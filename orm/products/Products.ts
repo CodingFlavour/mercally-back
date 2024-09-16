@@ -3,11 +3,9 @@ import { SortBy } from "../prices/base";
 import { Stores } from "../stores/Stores";
 import ProductsBase, { Product } from "./base";
 
-type OverchargedUnknown = unknown & { id_product: number }
-
 type SearchParams = {
-  searchProduct: string;
   stores: number[];
+  searchProduct?: string;
   min_price?: number;
   max_price?: number;
   min_price_per_unit?: number;
@@ -58,15 +56,15 @@ class Products extends ProductsBase {
     const queryIsWhiteBrand = is_white_brand !== undefined ? `AND is_white_brand = ${is_white_brand == true}` : '';
     const queryIdBrand = id_brands ? `AND id_brand IN (${id_brands.join(',')})` : '';
     const orderBy = new Price().getOrderBy(sort_by)
+    const searchProductName = searchProduct ? `product_name LIKE '%${searchProduct}%'` : '1=1';
 
-    // Vamos a añadir tambien los datos de la store que necesito el nombre y se puedeusar en mas sitios
     const [products] = await this.query<QueryResultItem[]>(`
       SELECT * 
       FROM ${this.table} 
       JOIN prices ON prices.id_product = products.id
       JOIN stores ON stores.id = prices.id_store
       WHERE 
-        product_name LIKE '%${searchProduct}%'
+        ${searchProductName}
         AND id_store IN (${stores.join(", ")})
         AND price >= ${min_price}
         ${queryMaxPrice}

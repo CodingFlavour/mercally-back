@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import { getProducts } from "../../orm/products/products-orm";
+import Products from "../../orm/products/Products";
 
 async function getProductsController(req: Request, res: Response, _next: Function) {
-  const products = await getProducts();
+  const products = await new Products().getAll();
 
   return res.send(products);
 }
 
 export { getProductsController };
+

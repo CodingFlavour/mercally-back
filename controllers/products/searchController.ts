@@ -5,10 +5,11 @@ async function searchController(req: Request, res: Response) {
   if (!req.query) return res.status(400).json({ error: 'Missing query' })
 
   const searchParam = req.query.search;
+  // En principio liberemos esto para que se puedan hacer busquedas sin query, solo cuando no hay absolutamente nada
   // const storesParam = req.query.stores;
-  if (!searchParam) {
-    return res.status(500).json({ error: "No product detected" });
-  }
+  // if (!searchParam) {
+  //   return res.status(500).json({ error: "No product detected" });
+  // } 
 
   const searchProduct = Array.isArray(searchParam) ? searchParam[0] : searchParam;
   /* Aqui tendriamos que comprobar lo siguiente:
@@ -17,11 +18,11 @@ async function searchController(req: Request, res: Response) {
   */
   const fakeStores = [1, 2, 4];
 
-  if (typeof searchProduct !== "string") {
+  if (searchProduct && typeof searchProduct !== "string") {
     return res.status(500).json({ error: "Invalid search" });
   }
 
-  if (searchProduct.length < 3) {
+  if (searchProduct && searchProduct.length < 3) {
     return res.status(500).json({ error: "Search term too short" });
   }
 
